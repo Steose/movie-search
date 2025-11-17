@@ -6,7 +6,8 @@
 # dotenv files
 .env
 
-.db
+# database files
+*.db
 
 # User-specific files
 *.rsuser
@@ -66,6 +67,7 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+obj/
 
 # Tye
 .tye/
