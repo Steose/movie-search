@@ -1,0 +1,94 @@
+@model MovieSearch.ViewModels.MovieSearchViewModel
+@{
+    ViewData["Title"] = "Movie Search";
+}
+
+@* Section 1: Search form *@
+<div class="card mb-4 movie-card">
+    <div class="card-body">
+        <h2 class="h4">Search OMDb</h2>
+        <form asp-action="Search" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label asp-for="SearchTerm" class="form-label"></label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="e.g. Gone with the Wind" />
+                <span asp-validation-for="SearchTerm" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+        @* Display friendly errors directly under the form *@
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-warning mt-3" role="alert">
+                @Model.ErrorMessage
+            </div>
+        }
+    </div>
+</div>
+
+@* Section 2: Latest search result *@
+@if (Model.MovieResult is not null)
+{
+    <div class="card mb-4 movie-card">
+        <div class="card-body">
+            <h3 class="h5 mb-3">@Model.MovieResult.Title (@Model.MovieResult.Year)</h3>
+            <p class="mb-2"><strong>Director:</strong> @Model.MovieResult.Director</p>
+            <p class="mb-2"><strong>IMDb Rating:</strong> @Model.MovieResult.ImdbRating</p>
+            <p>@Model.MovieResult.Plot</p>
+            @if (!string.IsNullOrWhiteSpace(Model.MovieResult.Poster))
+            {
+                <img src="@Model.MovieResult.Poster" alt="Poster for @Model.MovieResult.Title" class="img-fluid rounded" style="max-height: 320px;" />
+            }
+        </div>
+    </div>
+}
+
+@* Section 3: Favorites table *@
+<div class="card movie-card">
+    <div class="card-body">
+        <h3 class="h5 mb-3">Favorites</h3>
+        @if (Model.Favorites.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped favorite-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Director</th>
+                            <th scope="col">IMDb</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var movie in Model.Favorites)
+                        {
+                            <tr>
+                                <td>@movie.Title</td>
+                                <td>@movie.Year</td>
+                                <td>@movie.Director</td>
+                                <td>@movie.ImdbRating</td>
+                                <td class="text-end">
+                                    <form asp-action="RemoveFavorite" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="imdbId" value="@movie.ImdbID" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted mb-0">No favorites yet. Search for a title to get started.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @* Client-side validation hooks (if unobtrusive validation is enabled later). *@
+    <partial name="_ValidationScriptsPartial" />
+}
